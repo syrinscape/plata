@@ -19,7 +19,7 @@ def product_xls(request):
     output = StringIO.StringIO()
     workbook = plata.reporting.product.product_xls()
     workbook.save(output)
-    response = HttpResponse(output.getvalue(), mimetype='application/vnd.ms-excel')
+    response = HttpResponse(output.getvalue(), content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=products.xls'
     return response
 
