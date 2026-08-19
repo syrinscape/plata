@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.test.simple import DjangoTestSuiteRunner
+try:
+    from django.test.runner import DiscoverRunner as DjangoTestSuiteRunner
+except ImportError:
+    from django.test.simple import DjangoTestSuiteRunner
 
 import coverage
 
