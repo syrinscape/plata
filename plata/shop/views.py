@@ -193,7 +193,7 @@ class Shop(object):
         all_modules = [get_callable(module)(self) for module in plata.settings.PLATA_PAYMENT_MODULES]
         if not request:
             return all_modules
-        return filter(lambda item: item.enabled_for_request(request), all_modules)
+        return list(filter(lambda item: item.enabled_for_request(request), all_modules))
 
     def default_currency(self, request=None):
         """

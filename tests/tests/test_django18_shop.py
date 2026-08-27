@@ -45,3 +45,16 @@ class Django18ShopTests(TestCase):
             [form.instance for form in formset.forms],
             [order_item],
         )
+
+    def test_payment_modules_for_request_are_reusable(self):
+        shop = FormsetShop(Contact, Order, Discount)
+        payment_modules = shop.get_payment_modules(
+            RequestFactory().get('/confirmation/')
+        )
+
+        first_pass = [module.__module__ for module in payment_modules]
+        self.assertTrue(first_pass)
+        self.assertEqual(
+            [module.__module__ for module in payment_modules],
+            first_pass,
+        )
