@@ -1,6 +1,19 @@
 import unittest
 
-from plata.fields import json_encode_default
+from plata.fields import CurrencyField, json_encode_default
+
+
+class CurrencyFieldChoicesTests(unittest.TestCase):
+    def test_currency_choices_are_reusable(self):
+        expected = [
+            ('CHF', 'CHF'),
+            ('EUR', 'EUR'),
+            ('USD', 'USD'),
+            ('CAD', 'CAD'),
+        ]
+
+        self.assertEqual(list(CurrencyField().choices), expected)
+        self.assertEqual(list(CurrencyField().choices), expected)
 
 
 class UnsupportedValue(object):
