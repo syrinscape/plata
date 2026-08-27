@@ -44,7 +44,7 @@ def order_cart_validates(order, shop, request, **kwargs):
 
     try:
         order.validate(order.VALIDATE_CART)
-    except ValidationError, e:
+    except ValidationError as e:
         for message in e.messages:
             messages.error(request, message)
         return shop.redirect('plata_shop_cart')

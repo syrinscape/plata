@@ -44,7 +44,7 @@ def json_encode_default(o):
     elif isinstance(o, decimal.Decimal):
         return str(o)
 
-    raise TypeError, 'Cannot encode %r' % o
+    raise TypeError('Cannot encode %r' % o)
 
 
 class JSONFormField(forms.fields.CharField):
