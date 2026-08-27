@@ -11,7 +11,7 @@ class Product(ProductBase):
     class Meta:
         ordering = ['name']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @models.permalink

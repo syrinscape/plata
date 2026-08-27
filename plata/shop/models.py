@@ -36,7 +36,7 @@ class TaxClass(models.Model):
         verbose_name = _('tax class')
         verbose_name_plural = _('tax classes')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -165,7 +165,7 @@ class Order(BillingShippingAddress):
         verbose_name = _('order')
         verbose_name_plural = _('orders')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.order_id
 
     def save(self, *args, **kwargs):
@@ -468,7 +468,7 @@ class OrderItem(models.Model):
         verbose_name = _('order item')
         verbose_name_plural = _('order items')
 
-    def __unicode__(self):
+    def __str__(self):
         return _(u'%(quantity)s of %(product)s') % {'quantity': self.quantity,
                                                     'product': self.product}
 
@@ -531,7 +531,7 @@ class OrderStatus(models.Model):
         verbose_name = _('order status')
         verbose_name_plural = _('order statuses')
 
-    def __unicode__(self):
+    def __str__(self):
         return (_(u'Status %(status)s for %(order)s') % {
             'status': self.get_status_display(),
             'order': self.order})
@@ -604,7 +604,7 @@ class OrderPayment(models.Model):
 
     objects = OrderPaymentManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return (_(u'%(authorized)s of %(currency)s %(amount).2f for %(order)s')
                 % {'authorized': self.authorized and _(u'Authorized')
                         or _(u'Not authorized'),
