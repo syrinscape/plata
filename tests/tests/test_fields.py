@@ -1,6 +1,6 @@
 import unittest
 
-from plata.fields import CurrencyField, json_encode_default
+from plata.fields import CurrencyField, JSONField, json_encode_default
 
 
 class CurrencyFieldChoicesTests(unittest.TestCase):
@@ -14,6 +14,14 @@ class CurrencyFieldChoicesTests(unittest.TestCase):
 
         self.assertEqual(list(CurrencyField().choices), expected)
         self.assertEqual(list(CurrencyField().choices), expected)
+
+
+class JSONFieldConversionTests(unittest.TestCase):
+    def test_text_values_are_decoded_and_mappings_are_encoded(self):
+        field = JSONField()
+
+        self.assertEqual(field.to_python('{"count": 2}'), {'count': 2})
+        self.assertEqual(field.get_prep_value({'count': 2}), '{"count": 2}')
 
 
 class UnsupportedValue(object):
