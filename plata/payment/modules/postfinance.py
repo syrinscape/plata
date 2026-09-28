@@ -115,7 +115,7 @@ class PaymentProcessor(ProcessorBase):
             form_params['currency'],
             form_params['PSPID'],
             POSTFINANCE['SHA1_IN'],
-            ))).hexdigest()
+            )).encode('utf-8')).hexdigest()
 
         return self.shop.render(request, 'payment/postfinance_form.html', {
             'order': order,
@@ -162,7 +162,7 @@ class PaymentProcessor(ProcessorBase):
                 POSTFINANCE['SHA1_OUT'],
                 ))
 
-            sha1_out = sha1(sha1_source).hexdigest()
+            sha1_out = sha1(sha1_source.encode('utf-8')).hexdigest()
 
             if sha1_out.lower() != SHASIGN.lower():
                 logger.error('IPN: Invalid hash in %s' % parameters_repr)
@@ -222,6 +222,6 @@ class PaymentProcessor(ProcessorBase):
                 self.order_paid(order, payment=payment)
 
             return HttpResponse('OK')
-        except Exception, e:
-            logger.error('IPN: Processing failure %s' % unicode(e))
+        except Exception as e:
+            logger.error('IPN: Processing failure %s' % str(e))
             raise

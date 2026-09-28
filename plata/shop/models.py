@@ -523,7 +523,7 @@ class OrderStatus(models.Model):
 
     order = models.ForeignKey(Order, related_name='statuses')
     created = models.DateTimeField(_('created'), default=datetime.now)
-    status = models.PositiveIntegerField(_('status'), max_length=20, choices=Order.STATUS_CHOICES)
+    status = models.PositiveIntegerField(_('status'), choices=Order.STATUS_CHOICES)
     notes = models.TextField(_('notes'), blank=True)
 
     class Meta:
@@ -659,7 +659,7 @@ class PriceBase(models.Model):
     tax_class = models.ForeignKey(TaxClass, verbose_name=_('tax class'),
                                   related_name='+')
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s %.2f' % (self.currency, self.unit_price)
 
     def handle_order_item(self, item):

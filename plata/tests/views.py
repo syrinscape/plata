@@ -1,5 +1,6 @@
 import os
 import re
+import urllib.parse
 
 from datetime import datetime, timedelta
 
@@ -116,6 +117,7 @@ class ViewTest(PlataTest):
             'quantity': 5,
             })
         self.assertEqual(order.items.count(), 2)
+        i2 = order.modify_item(p2, 0)
 
         self.assertEqual(Order.objects.get().status, Order.CART)
         self.assertRedirects(self.client.post('/cart/', {
@@ -350,16 +352,20 @@ class ViewTest(PlataTest):
         }
 
         from plata.payment.modules import paypal
-        import cgi
+        verification_encodings = ['utf-8', 'windows-1252']
+
         def mock_urlopen(*args, **kwargs):
-            qs = cgi.parse_qs(args[1].encode('ascii'))
+            qs = urllib.parse.parse_qs(
+                args[1].decode('ascii'),
+                encoding=verification_encodings.pop(0),
+            )
             self.assertEqual(qs['cmd'][0], '_notify-validate')
-            for k, v in paypal_ipn_data.iteritems():
-                self.assertEqual(unicode(qs[k][0], 'utf-8'), v)
-            import StringIO
-            s = StringIO.StringIO('VERIFIED')
+            for k, v in paypal_ipn_data.items():
+                self.assertEqual(qs[k][0], v)
+            import io
+            s = io.BytesIO(b'VERIFIED')
             return s
-        paypal.urllib2.urlopen = mock_urlopen
+        paypal.urllib.request.urlopen = mock_urlopen
 
         shop = plata.shop_instance()
         request = get_request()
@@ -385,16 +391,17 @@ class ViewTest(PlataTest):
             'Ok'
         )
 
-        # test windows-1252 encoded IPN also:
+        # Test a raw Windows-1252 IPN body, as PayPal submits it.
+        windows_1252_body = urllib.parse.urlencode(
+            dict(paypal_ipn_data, charset='windows-1252'),
+            encoding='windows-1252',
+        ).encode('windows-1252')
         self.assertContains(
-            self.client.post(
+            self.client.generic(
+                'POST',
                 '/payment/paypal/ipn/',
-                dict(
-                    map(
-                        lambda (k,v): (k, v.encode('windows-1252')),
-                        dict(paypal_ipn_data, charset='windows-1252').items()
-                    )
-                ),
+                windows_1252_body,
+                content_type='application/x-www-form-urlencoded',
             ),
             'Ok'
         )
@@ -554,7 +561,7 @@ class ViewTest(PlataTest):
         contact = Contact.objects.get()
         # First name should be updated in checkout processing
         self.assertEqual(contact.billing_first_name, 'Fritz')
-        self.assertEqual(unicode(contact), 'else@example.com') # Username
+        self.assertEqual(str(contact), 'else@example.com') # Username
 
         # Order should be assigned to contact
         self.assertEqual(Order.objects.count(), 1)

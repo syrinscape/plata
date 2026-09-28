@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-import StringIO
+import io
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -392,7 +392,7 @@ class ModelTest(PlataTest):
 
         try:
             d.validate(order)
-        except ValidationError, e:
+        except ValidationError as e:
             self.assertEqual(len(e.messages), 2)
 
         d.is_active = True
@@ -400,7 +400,7 @@ class ModelTest(PlataTest):
 
         try:
             d.validate(order)
-        except ValidationError, e:
+        except ValidationError as e:
             self.assertEqual(len(e.messages), 2)
 
     def test_11_multiple_discounts(self):
@@ -796,6 +796,12 @@ class ModelTest(PlataTest):
 
     def test_23_mixed_tax(self):
         order_processors = plata.settings.PLATA_ORDER_PROCESSORS[:]
+        self.addCleanup(
+            setattr,
+            plata.settings,
+            'PLATA_ORDER_PROCESSORS',
+            order_processors,
+        )
         plata.settings.PLATA_ORDER_PROCESSORS[-2] = 'plata.shop.processors.FixedAmountShippingProcessor'
 
         p1 = self.create_product(stock=10)
@@ -822,21 +828,19 @@ class ModelTest(PlataTest):
 
         tax_details = dict(order.data['tax_details'])
 
-        # Two tax rates
-        self.assertEqual(len(tax_details), 2)
+        # Two product tax rates plus the fixed-shipping tax rate.
+        self.assertEqual(len(tax_details), 3)
 
         self.assertAlmostEqual(tax_details[Decimal('12.5')]['tax_amount'], Decimal('33.28'), 2)
-        self.assertAlmostEqual(tax_details[Decimal('7.6')]['tax_amount'], Decimal('28.78'), 2)
+        self.assertAlmostEqual(tax_details[Decimal('7.6')]['tax_amount'], Decimal('28.22'), 2)
 
-        # Shipping has to be added here too; otherwise it should be 399.50
-        self.assertAlmostEqual(tax_details[Decimal('7.6')]['total'], Decimal('407.50'))
-
-        plata.settings.PLATA_ORDER_PROCESSORS = order_processors[:]
+        self.assertAlmostEqual(tax_details[Decimal('7.6')]['total'], Decimal('399.50'))
+        self.assertAlmostEqual(tax_details[Decimal('8.0')]['total'], Decimal('8.00'))
 
     def test_24_uninitialized_order(self):
         # This should not crash; generating a PDF exercises the methods
         # and properties of the order
-        plata.reporting.order.invoice_pdf(PDFDocument(StringIO.StringIO()),
+        plata.reporting.order.invoice_pdf(PDFDocument(io.BytesIO()),
             Order.objects.create())
 
     def test_25_discount_validation(self):
@@ -942,14 +946,12 @@ class ModelTest(PlataTest):
         product = Product.objects.create(name='Test Product',)
         order = self.create_order()
         orderitem = self.create_orderitem(product, order)
-        self.assertEqual(unicode(orderitem),
+        self.assertEqual(str(orderitem),
                          u'1 of Test Product')
         orderstatus = OrderStatus.objects.create(order=order, status=Order.PAID)
-        self.assertEqual(unicode(orderstatus),
+        self.assertEqual(str(orderstatus),
                          u'Status Order has been paid for O-000000001')
         orderpayment = OrderPayment.objects.create(
             order=order, currency=100, amount=1, authorized=date.today())
-        self.assertEqual(unicode(orderpayment),
+        self.assertEqual(str(orderpayment),
                          u'Authorized of 100 1.00 for O-000000001')
-
-

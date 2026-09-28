@@ -1,3 +1,3 @@
-from admin import AdminTest
-from models import ModelTest
-from views import ViewTest
+from plata.tests.admin import AdminTest
+from plata.tests.models import ModelTest
+from plata.tests.views import ViewTest

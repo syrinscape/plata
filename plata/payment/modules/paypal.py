@@ -12,7 +12,7 @@ Needs the following settings to work correctly::
 from datetime import datetime
 from decimal import Decimal
 import logging
-import urllib2
+import urllib.request
 
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
@@ -80,7 +80,7 @@ class PaymentProcessor(ProcessorBase):
     @csrf_exempt_m
     def ipn(self, request):
         if not request._read_started:
-            if 'windows-1252' in request.body:
+            if b'windows-1252' in request.body:
                 if request.encoding != 'windows-1252':
                     request.encoding = 'windows-1252'
         else: # middleware (or something else?) has triggered request reading
@@ -124,9 +124,9 @@ class PaymentProcessor(ProcessorBase):
                 querystring = 'cmd=_notify-validate&%s' % (
                     request.POST.urlencode()
                 )
-                status = urllib2.urlopen(PP_URL, querystring).read()
+                status = urllib.request.urlopen(PP_URL, querystring.encode('ascii')).read()
 
-                if not status == "VERIFIED":
+                if status != b'VERIFIED':
                     logger.error(
                         'IPN: Received status %s, '
                         'could not verify parameters %s' % (
@@ -197,8 +197,8 @@ class PaymentProcessor(ProcessorBase):
 
                 return HttpResponse("Ok")
 
-        except Exception, e:
-            logger.error('IPN: Processing failure %s' % unicode(e))
+        except Exception as e:
+            logger.error('IPN: Processing failure %s' % str(e))
             raise
         else:
             logger.warning('IPN received without POST parameters')

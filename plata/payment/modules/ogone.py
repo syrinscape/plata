@@ -166,12 +166,12 @@ class PaymentProcessor(ProcessorBase):
                 PAYID = request.POST['PAYID']
                 BRAND = request.POST['BRAND']
                 SHASIGN = request.POST['SHASIGN']
-            except KeyError, e:
+            except KeyError as e:
                 logger.error('IPN: Missing data in %s' % parameters_repr)
                 return HttpResponseForbidden('Missing data')
 
             value_strings = [u'{0}={1}{2}'.format(key.upper(), value, OGONE['SHA1_OUT'])
-                                for key, value in request.POST.iteritems()
+                                for key, value in request.POST.items()
                                     if value and not key == 'SHASIGN']
             sha1_out = sha1((u''.join(sorted(value_strings))).encode('utf-8')).hexdigest()
 
@@ -233,6 +233,6 @@ class PaymentProcessor(ProcessorBase):
                 self.order_paid(order, payment=payment)
 
             return HttpResponse('OK')
-        except Exception, e:
-            logger.error('IPN: Processing failure %s' % unicode(e))
+        except Exception as e:
+            logger.error('IPN: Processing failure %s' % str(e))
             raise

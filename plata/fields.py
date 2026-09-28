@@ -127,6 +127,6 @@ try:
 
     JSONField_introspection_rule = ( (JSONField,), [], {}, )
 
-    add_introspection_rules(rules=[JSONField_introspection_rule], patterns=["^plata\.fields"])
+    add_introspection_rules(rules=[JSONField_introspection_rule], patterns=[r"^plata\.fields"])
 except ImportError:
     pass

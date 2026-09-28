@@ -49,11 +49,11 @@ class PlataTest(TestCase):
     def assertRaisesWithCode(self, exception, fn, code):
         try:
             fn()
-        except exception, e:
+        except exception as e:
             if e.code == code:
                 return True
             raise
-        raise Exception, '%s did not raise %s' % (fn, exception)
+        raise Exception('%s did not raise %s' % (fn, exception))
 
     def setUp(self):
         plata.settings.PLATA_PRICE_INCLUDES_TAX = True
@@ -83,7 +83,8 @@ class PlataTest(TestCase):
     def create_orderitem(self, product, order):
         return OrderItem.objects.create(product=product, order=order,
                                         quantity=1, _unit_price=0,
-                                        _unit_tax=0, tax_rate=0)
+                                        _unit_tax=0, tax_rate=0,
+                                        is_sale=False)
 
     def create_tax_classes(self):
         self.tax_class, created = TaxClass.objects.get_or_create(

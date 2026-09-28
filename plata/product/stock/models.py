@@ -18,8 +18,8 @@ Follow these steps to enable this module:
 
 from datetime import datetime, timedelta
 
-from django.core.exceptions import (FieldError, ImproperlyConfigured,
-    ValidationError)
+from django.core.checks import Error, register
+from django.core.exceptions import FieldError, ValidationError
 from django.db import models
 from django.db.models import Sum, Q, signals
 from django.utils.translation import ugettext_lazy as _, ugettext
@@ -65,7 +65,7 @@ class Period(models.Model):
 
     objects = PeriodManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -245,7 +245,7 @@ class StockTransaction(models.Model):
 
     objects = StockTransactionManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s %s of %s' % (
             self.change,
             self.get_type_display(),
@@ -276,12 +276,17 @@ def validate_order_stock_available(order):
 
 
 if plata.settings.PLATA_STOCK_TRACKING:
-    product_model = plata.product_model()
-    try:
-        product_model._meta.get_field('items_in_stock')
-    except models.FieldDoesNotExist:
-        raise ImproperlyConfigured(
-            'Product model %r must have a field named `items_in_stock`' % product_model)
+    @register()
+    def check_product_model(app_configs, **kwargs):
+        product_model = plata.product_model()
+        try:
+            product_model._meta.get_field('items_in_stock')
+        except models.FieldDoesNotExist:
+            return [Error(
+                'Product model %r must have a field named `items_in_stock`' % product_model,
+                id='plata.E001',
+            )]
+        return []
 
     signals.post_delete.connect(update_items_in_stock, sender=StockTransaction)
     signals.post_save.connect(update_items_in_stock, sender=StockTransaction)

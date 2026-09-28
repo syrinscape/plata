@@ -1,4 +1,4 @@
-import StringIO
+from io import BytesIO
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
@@ -16,7 +16,7 @@ def product_xls(request):
     """
     Returns an XLS containing product information
     """
-    output = StringIO.StringIO()
+    output = BytesIO()
     workbook = plata.reporting.product.product_xls()
     workbook.save(output)
     response = HttpResponse(output.getvalue(), content_type='application/vnd.ms-excel')
@@ -46,4 +46,3 @@ def packing_slip_pdf(request, order_id):
     pdf, response = pdf_response('packing-slip-%09d' % order.id)
     plata.reporting.order.packing_slip_pdf(pdf, order)
     return response
-

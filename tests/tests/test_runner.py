@@ -14,22 +14,22 @@ class CoverageRunner(DjangoTestSuiteRunner):
         run_with_coverage = hasattr(settings, 'COVERAGE_MODULES')
 
         if run_with_coverage:
-            coverage.use_cache(0)
-            coverage.start()
+            coverage_runner = coverage.Coverage()
+            coverage_runner.start()
 
         result = super(CoverageRunner, self).run_tests(*args, **kwargs)
 
         if run_with_coverage:
-            coverage.stop()
-            print ''
-            print '----------------------------------------------------------------------'
-            print ' Unit Test Code Coverage Results'
-            print '----------------------------------------------------------------------'
+            coverage_runner.stop()
+            print('')
+            print('----------------------------------------------------------------------')
+            print(' Unit Test Code Coverage Results')
+            print('----------------------------------------------------------------------')
             coverage_modules = []
             for module in settings.COVERAGE_MODULES:
                 coverage_modules.append(__import__(module, globals(),
                                                    locals(), ['']))
-            coverage.report(coverage_modules, show_missing=1)
-            print '----------------------------------------------------------------------'
+            coverage_runner.report(coverage_modules, show_missing=1)
+            print('----------------------------------------------------------------------')
 
         return result
