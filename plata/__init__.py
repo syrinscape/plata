@@ -51,5 +51,5 @@ def product_model():
     """
     Return the product model defined by the ``PLATA_SHOP_PRODUCT`` setting.
     """
-    from django.db.models import loading
-    return loading.get_model(*settings.PLATA_SHOP_PRODUCT.split('.'))
+    from django.apps import apps
+    return apps.get_model(*settings.PLATA_SHOP_PRODUCT.split('.'))
